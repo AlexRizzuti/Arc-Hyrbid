@@ -1,121 +1,436 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Alex’s Functional Strength & Athletic Trainer</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ffffff">
-<link rel="apple-touch-icon" href="assets/icon-192.png">
-<link rel="stylesheet" href="styles.css">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
-  }
-</script>
+<title>ARC Hybrid — by GPT</title>
+<meta name="theme-color" content="#0f1115" />
+<style>
+/* ====== THEME ====== */
+:root{
+  --bg:#0f1115; --card:#171a21; --ink:#e9ecf1; --muted:#a7b0bd;
+  --brand:#4da3ff; --accent:#62e0a6; --warn:#ffb84d; --danger:#ff6b6b; --line:#242a34;
+}
+:root[data-theme="light"]{
+  --bg:#f6f7fb; --card:#ffffff; --ink:#0c1220; --muted:#566074; --line:#e6e8ef;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+
+/* ====== LAYOUT ====== */
+.container{max-width:980px;margin:0 auto;padding:18px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+h1{font-size:22px;margin:0}
+.badge{padding:4px 10px;border-radius:999px;background:var(--card);color:var(--muted);
+  border:1px solid var(--line);font-size:12px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+select,button,input[type="number"],input[type="text"]{
+  background:var(--card);color:var(--ink);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;font-size:14px}
+button{cursor:pointer} button.primary{background:var(--brand);color:#061525;border:none}
+button.success{background:var(--accent);color:#062016;border:none}
+button.warn{background:var(--warn);color:#221a00;border:none}
+button.ghost{background:transparent;border:1px solid var(--line)}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;position:relative}
+.card h3{margin:0 0 6px 0}
+.kv{color:var(--muted);font-size:13px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:3px 8px;border-radius:999px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.small{font-size:12px;color:var(--muted)}
+.card.current{outline:2px solid var(--brand)}
+
+/* ====== TIMER ====== */
+.progress{height:10px;background:#0b0d12;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.progress>div{height:100%;background:linear-gradient(90deg,var(--brand),#7bd0ff);width:0%}
+.timer-big{font-size:28px;font-weight:700}
+
+/* ====== MODALS ====== */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;z-index:1000;
+  background:rgba(0,0,0,.5)}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:16px;max-width:760px;width:100%;padding:16px}
+.modal header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.modal input{width:100%;margin:6px 0 10px 0}
+.list{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:12px;margin-top:6px}
+.list .group{padding:8px 10px;border-bottom:1px solid var(--line)}
+.list .group h4{margin:0 0 6px 0;font-size:13px;color:var(--muted)}
+.list button{display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-radius:10px;background:transparent;color:var(--ink)}
+.list button:hover{background:rgba(255,255,255,.06)}
+
+/* ====== SETTINGS (bulletproof on iPhone) ====== */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr}}
+.settings-grid label{display:flex;align-items:center;gap:10px;background:var(--card);
+  border:1px solid var(--line);padding:10px 12px;border-radius:10px}
+.settings-grid input{transform:scale(1.1)}
+.settings-grid label span{
+  flex:1 1 auto; display:block; white-space:normal; overflow-wrap:anywhere; line-height:1.25;
+}
+
+/* ====== TOAST ====== */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:2000;
+  background:var(--accent);color:#062016;padding:8px 12px;border-radius:10px;display:none}
+</style>
 </head>
 <body>
-<div class="splash" id="splash">
-  <div class="brand">Alex’s Functional Trainer</div>
-  <div class="spinner"></div>
-</div>
-<div class="app" id="app" style="display:none;">
-  <div class="header">
-    <div class="brand">Alex’s Trainer</div>
-    <button class="btn clear" id="btnSettings">⚙️</button>
+<div class="container">
+  <header>
+    <h1>ARC Hybrid</h1>
+    <span class="badge" id="themeBadge">Dark</span>
+    <label class="toggle" style="margin-left:auto;display:flex;align-items:center;gap:6px">
+      <input id="themeToggle" type="checkbox"><span>Light mode</span>
+    </label>
+    <button id="settingsBtn" class="ghost">⚙️ Settings</button>
+    <button id="guidedBtn" class="ghost">🎧 Guided: On</button>
+  </header>
+
+  <div class="controls">
+    <select id="daySelect"></select>
+    <button id="backExercise" class="ghost">← Back</button>
+    <button id="nextExercise" class="ghost">Next →</button>
+    <button id="startBtn" class="primary">Start</button>
+    <button id="finishBtn" class="ghost">Finish</button>
+    <button id="resetBtn" class="ghost">Reset</button>
+    <span class="badge" id="status">Ready</span>
   </div>
 
-  <div id="screenHome">
-    <div class="title">Choose your day</div>
-    <div id="weekTracker" class="card"></div>
-    <button class="btn" style="margin: 10px 16px;" id="btnGuided">Start Guided Mode</button>
-    <div id="daysList"></div>
-  </div>
+  <div id="workoutList" class="grid"></div>
 
-  <div id="screenWorkout" style="display:none;">
-    <div class="title" id="dayTitle"></div>
-    <div id="exerciseList"></div>
-    <div class="footer">
-      <button class="btn" id="btnFinishDay">Finish Workout</button>
-      <button class="btn secondary" id="btnBackHome">Back</button>
+  <div class="card">
+    <h3>Timer</h3>
+    <div class="row">
+      <button id="workBtn" class="primary">Start Work</button>
+      <button id="restBtn" class="warn">Start Rest</button>
+      <button id="pauseBtn" class="ghost">Pause</button>
+      <button id="resumeBtn" class="ghost">Resume</button>
+      <button id="stopBtn" class="ghost">Stop</button>
+      <span class="badge timer-big" id="clock">00:00</span>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="small" id="timerLabel">Idle</div>
+    <div class="row" style="margin-top:8px">
+      <label>Work (s): <input id="workSecs" type="number" value="45" min="1" style="width:80px"></label>
+      <label>Rest (s): <input id="restSecs" type="number" value="60" min="1" style="width:80px"></label>
+      <button id="soundToggle" class="ghost">🔔 Sound: On</button>
     </div>
   </div>
-
-  <div id="screenMobility" style="display:none;">
-    <div class="title">Stretching & Mobility</div>
-    <div id="mobilityList" class="card"></div>
-    <div class="footer">
-      <button class="btn" id="btnDoneMobility">Done</button>
-    </div>
-  </div>
-
-  <div id="screenGuided" style="display:none;">
-    <div class="card">
-      <div class="row-space">
-        <div><span class="badge" id="guidedDayName">Day</span></div>
-        <div class="small"><span id="guidedProgress">1/5</span></div>
-      </div>
-      <div class="row" id="guidedIllustration" style="justify-content:center; margin:6px 0;"></div>
-      <div class="title" id="guidedExerciseName" style="margin:8px 0 0 0;"></div>
-      <div class="row-space small">
-        <div id="guidedMeta"></div>
-        <div><button class="btn clear" id="btnSwap">Swap</button></div>
-      </div>
-      <div class="timer" id="timer">00:00</div>
-      <div class="row-space" style="padding:8px 0;">
-        <button class="btn secondary" id="btnStartRest">Start Rest</button>
-        <button class="btn" id="btnNext">Next Exercise</button>
-      </div>
-      <div class="row-space" style="padding-top:6px;">
-        <button class="btn clear" id="btnSkip">Skip</button>
-        <button class="btn clear" id="btnMarkDone">Mark Done</button>
-      </div>
-    </div>
-    <div class="footer">
-      <button class="btn secondary" id="btnExitGuided">Exit Guided Mode</button>
-    </div>
-  </div>
-
-  <div class="modal" id="modalSheet">
-    <div class="sheet">
-      <div class="row-space">
-        <div class="title" id="modalTitle" style="margin:0;">Exercise</div>
-        <button class="btn clear" id="closeModal">Close</button>
-      </div>
-      <div id="modalIllustration" class="row" style="justify-content:center; margin:8px 0;"></div>
-      <div id="modalDetails" class="small"></div>
-      <div class="hr"></div>
-      <div><strong>Substitutions</strong></div>
-      <div id="subsList" class="list"></div>
-    </div>
-  </div>
-
-  <div class="modal" id="modalSettings">
-    <div class="sheet">
-      <div class="row-space">
-        <div class="title" style="margin:0;">Settings</div>
-        <button class="btn clear" id="closeSettings">Close</button>
-      </div>
-      <div class="card">
-        <div class="row-space">
-          <div>Sound cues</div>
-          <label class="row" style="gap:6px;">
-            <input type="checkbox" id="toggleSound"/>
-            <span class="small">Beep after rest & at round start</span>
-          </label>
-        </div>
-      </div>
-      <div class="card">
-        <div class="row-space">
-          <div>Reset weekly tracker</div>
-          <button class="btn secondary" id="btnResetWeek">Reset</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<script src="app.js"></script>
+<!-- Swap Modal -->
+<div class="modal" id="swapModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <header>
+      <h3 id="swapTitle" style="margin:0;font-size:18px">Swap Exercise</h3>
+      <button id="swapClose" class="ghost">✕</button>
+    </header>
+    <div class="chips" id="swapMeta" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    <input id="swapSearch" type="text" placeholder="Search exercise…"/>
+    <div class="list" id="swapList"></div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end">
+      <button id="swapRevert" class="ghost">↩︎ Revert</button>
+      <button id="swapApply" class="primary">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal" id="settingsModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <header>
+      <h3 style="margin:0;font-size:18px">Settings — Equipment</h3>
+      <button id="settingsClose" class="ghost">✕</button>
+    </header>
+    <div class="settings-grid" id="equipGrid"></div>
+    <div class="small" style="margin-top:6px">Turn OFF anything you don’t have. Smart swaps will match.</div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end"><button id="settingsSave" class="primary">Save</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+/* ====== UTIL ====== */
+const LS={get:(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(_){return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+const $=s=>document.querySelector(s);
+const on=(s,e,fn)=>{const el=$(s); if(el) el.addEventListener(e,fn);};
+const toast=(msg)=>{const t=$("#toast"); t.textContent=msg; t.style.display="block"; setTimeout(()=>t.style.display="none",1200);};
+function setTxt(id,txt){const el=document.getElementById(id); if(el) el.textContent=txt;}
+function val(id){const el=document.getElementById(id); return el?el.value:'';}
+
+/* ====== AUDIO CHIME ====== */
+let AC=null, sound=LS.get('soundOn',true);
+function beep(freq=880,dur=0.08,vol=60){ if(!sound) return;
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type='sine'; o.frequency.value=freq; g.gain.value=vol/100;
+    o.connect(g).connect(AC.destination); o.start(); setTimeout(()=>o.stop(), dur*1000);
+  }catch(e){} }
+function flash(t){const s=$("#status"); if(!s) return; s.textContent=t; s.style.background='var(--accent)'; s.style.color='#062016';
+  setTimeout(()=>{s.textContent='Ready'; s.style.background='var(--card)'; s.style.color='var(--muted)';},1200);}
+
+/* ====== PLAN ====== */
+const ex=(name,sets,reps,rest,equip,cat,swaps)=>({name,sets,reps,rest,equip,cat,swaps:swaps||[],originalName:name});
+const PLAN={days:[
+  {id:"Day 1 — Power + Lower",blocks:[
+    ex("Back Squat",4,"5",90,["Barbell"],"Squat",["Front Squat","Goblet Squat"]),
+    ex("Romanian Deadlift",4,"8",90,["Barbell"],"Hinge",["DB Romanian Deadlift","Good Morning"]),
+    ex("Bulgarian Split Squat",3,"10 / leg",60,["Dumbbells","Bodyweight"],"Lunge",["Walking Lunge","Reverse Lunge"]),
+    ex("Box Jump",3,"8",60,["Bodyweight"],"Plyo",["Broad Jump","Jump Squat"]),
+    ex("Plank",3,"45s",45,["Bodyweight"],"Core: Anti-Ext",["Side Plank","Hollow Hold"]),
+  ]},
+  {id:"Day 2 — Push Focus",blocks:[
+    ex("Bench Press",4,"5",120,["Barbell"],"Horizontal Push",["DB Bench Press","Push-Ups"]),
+    ex("Overhead Press",4,"6",120,["Barbell"],"Vertical Push",["Landmine Press","Incline Push-Ups"]),
+    ex("Dumbbell Incline Press",3,"10",75,["Dumbbells"],"Horizontal Push",["Incline Barbell Press","Push-Ups"]),
+    ex("Medicine Ball Slam",4,"8",60,["Med Ball"],"Power Throw",["Kettlebell Swing","Push Press 8"]),
+    ex("Battle Rope Waves",4,"20s",40,["Battle Rope"],"Conditioning",["Sled Push","Row Erg Sprint 20s"]),
+  ]},
+  {id:"Day 3 — Athletic Conditioning",blocks:[
+    ex("Sled Push",6,"20–30m",60,["Sled/Prowler"],"Conditioning",["Hill Sprint 10–15s","Row Erg Sprint 20s"]),
+    ex("Kettlebell Swing",5,"12",60,["Kettlebell"],"Hinge",["DB Swing","Hip Thrust"]),
+    ex("Burpees",4,"10",45,["Bodyweight"],"Conditioning",["Up-Downs (no push-up)","Row 150m Sprint"]),
+    ex("Hanging Leg Raise",3,"8–12",45,["Bodyweight"],"Core: Lats/Hips",["Captains Chair Knee Raise","Lying Leg Raise"]),
+    ex("Side Plank",3,"30s / side",30,["Bodyweight"],"Core: Anti-Ext",["Pallof Press Hold","Bird Dog Hold"]),
+  ]},
+  {id:"Day 4 — Pull Focus",blocks:[
+    ex("Pull-Ups",5,"AMRAP",120,["Bodyweight"],"Row/Pull",["Chin-Ups","Lat Pulldown"]),
+    ex("Bent-Over Barbell Row",4,"6–8",90,["Barbell"],"Row/Pull",["One-Arm DB Row","Chest-Supported Row"]),
+    ex("Seated Cable Row",3,"10",75,["Cable/Machine"],"Row/Pull",["Machine Row","Inverted Row"]),
+    ex("Face Pull",3,"12–15",60,["Cable/Machine","Bands"],"Row/Pull",["Rear Delt Fly","High Row"]),
+    ex("Farmer’s Carry",4,"30–40m",60,["Dumbbells","Kettlebell","Trap Bar"],"Carry",["Suitcase Carry","Trap Bar Carry"]),
+  ]},
+  {id:"Day 5 — Power Upper + Conditioning",blocks:[
+    ex("Jump Squat",4,"6",60,["Bodyweight"],"Plyo",["Box Jump","Broad Jump"]),
+    ex("Explosive Push-Ups",4,"5–6",75,["Bodyweight"],"Horizontal Push",["Clap Push-Ups","DB Bench 10"]),
+    ex("Med Ball Overhead Throw",4,"6",75,["Med Ball"],"Power Throw",["MB Slam 10","Push Press 10","Landmine Push Press 8"]),
+    ex("KB Clean & Press (each arm)",3,"8/arm",90,["Kettlebell"],"Vertical Push",["DB Clean & Press 8/arm","Push Press 10"]),
+    ex("Mountain Climbers",3,"30s",30,["Bodyweight"],"Conditioning",["SkiErg 20s","Row Erg Sprint 20s"]),
+  ]},
+]};
+const DESC={
+  "Back Squat":"Bar on upper traps, brace, sit between hips, knees over toes.",
+  "Romanian Deadlift":"Hinge; soft knees; bar slides along thighs; neutral back.",
+  "Bulgarian Split Squat":"Back foot elevated; tall torso; front shin vertical.",
+  "Box Jump":"Load hips & arms, jump softly, stand tall to finish.",
+  "Plank":"Elbows under shoulders; ribs down; glutes tight; straight line.",
+  "Bench Press":"Feet planted; bar to mid-chest; elbows ~45°; press to lockout.",
+  "Overhead Press":"Bar from shoulders to overhead; head through; ribs down.",
+  "Dumbbell Incline Press":"30–45° bench; DBs to chest line; press up.",
+  "Medicine Ball Slam":"Reach tall; hinge; drive ball down explosively.",
+  "Battle Rope Waves":"Athletic stance; quick even waves; torso quiet.",
+  "Sled Push":"Forward lean; neutral spine; short powerful steps.",
+  "Kettlebell Swing":"Hinge; snap hips; bell floats to chest height.",
+  "Burpees":"Hands down; jump to plank; back to feet; small jump.",
+  "Hanging Leg Raise":"Dead hang; raise legs without swinging.",
+  "Side Plank":"Feet stacked; elbow under shoulder; hips high.",
+  "Pull-Ups":"Overhand; chest to bar; control down.",
+  "Bent-Over Barbell Row":"Hinge ~45°; pull to ribs; back flat.",
+  "Seated Cable Row":"Tall torso; pull to ribs; squeeze blades.",
+  "Face Pull":"Rope to eye line; elbows high; thumbs back.",
+  "Farmer’s Carry":"Heavy bells at sides; tall; brisk walk.",
+  "Jump Squat":"Quarter-squat and jump; land softly.",
+  "Explosive Push-Ups":"Powerful push; core tight; hands light.",
+  "Med Ball Overhead Throw":"Dip then drive ball up/forward explosively.",
+  "KB Clean & Press (each arm)":"Rack clean; press overhead; glutes tight.",
+  "Mountain Climbers":"Plank; knees drive under chest; hips level."
+};
+
+/* ====== STATE ====== */
+const EQUIP_ALL=["Barbell","Dumbbells","Kettlebell","Cable/Machine","Bands","Bodyweight","Med Ball","Sled/Prowler","Battle Rope","Erg/Row/Ski","Landmine"];
+const defaultEquip=Object.fromEntries(EQUIP_ALL.map(e=>[e,true]));
+const state={day:+LS.get('currentDay',0),cursor:0,guided:LS.get('guided',true)};
+
+/* ====== THEME ====== */
+function applyTheme(light){document.documentElement.setAttribute('data-theme',light?'light':'dark');}
+function updateThemeBadge(){$('#themeBadge').textContent=document.documentElement.getAttribute('data-theme')==='light'?'Light':'Dark';}
+
+/* ====== RENDER ====== */
+function renderDay(){
+  const list=$("#workoutList"); const day=PLAN.days[state.day];
+  list.innerHTML='';
+  const doneMap=LS.get(`hybrid_done_day${state.day}`,{}), notesMap=LS.get(`hybrid_notes_day${state.day}`,{});
+  day.blocks.forEach((b,i)=>{
+    const id=`ex-${i}`;
+    const card=document.createElement('div'); card.className='card'+(state.cursor===i?' current':'');
+    const tips=DESC[b.name]?`<button class="ghost" data-action="tips" data-i="${i}">Tips</button>`:'';
+    card.innerHTML=`
+      <h3>${b.name}</h3>
+      <div class="kv">Sets: <b id="${id}-setsDone">${doneMap[i]||0}</b> / ${b.sets} • Reps: <b>${b.reps}</b> • Rest: <b>${b.rest}s</b></div>
+      <div class="tags">${[b.cat,...b.equip].map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="actions">
+        <button class="success" data-action="set" data-i="${i}">Set done</button>
+        <button class="ghost" data-action="swap" data-i="${i}">Swap</button>
+        ${tips}
+        <button class="ghost" data-action="note" data-i="${i}">Notes</button>
+        <span class="small" id="${id}-note">${notesMap[i]?"📝 "+notesMap[i]:""}</span>
+      </div>
+      <input type="hidden" id="${id}-count" value="${doneMap[i]||0}" />
+    `;
+    list.appendChild(card);
+  });
+  list.onclick=(e)=>{
+    const btn=e.target.closest('button'); if(!btn) return;
+    const i=+btn.dataset.i; const ex=PLAN.days[state.day].blocks[i]; const id=`ex-${i}`;
+    if(btn.dataset.action==='set'){
+      let v=+$('#'+id+'-count').value+1; if(v>ex.sets) v=ex.sets;
+      $('#'+id+'-count').value=v; $('#'+id+'-setsDone').textContent=v;
+      const m=LS.get(`hybrid_done_day${state.day}`,{}); m[i]=v; LS.set(`hybrid_done_day${state.day}`,m);
+      beep(880,0.06);
+      if(state.guided){ const r=parseInt(ex.rest,10)||60; startTimer(r,'rest'); setTxt('timerLabel',`Rest ${r}s — next: ${ex.name}`); }
+      if(v===ex.sets){ flash('Completed!'); if(i===state.cursor) nextExercise(); }
+    }
+    if(btn.dataset.action==='swap'){ openSwap(i); }
+    if(btn.dataset.action==='note'){
+      const nm=LS.get(`hybrid_notes_day${state.day}`,{}); const txt=prompt('Add/edit note:', nm[i]||'');
+      if(txt!==null){ nm[i]=txt; LS.set(`hybrid_notes_day${state.day}`,nm); $('#'+id+'-note').textContent=txt?("📝 "+txt):""; }
+    }
+    if(btn.dataset.action==='tips'){ alert(`${ex.name}\n\n${DESC[ex.name]||'No tips yet.'}`); }
+  };
+}
+function nextExercise(){ const d=PLAN.days[state.day]; state.cursor=Math.min(d.blocks.length-1,state.cursor+1); renderDay(); }
+function prevExercise(){ state.cursor=Math.max(0,state.cursor-1); renderDay(); }
+
+/* ====== SMART SWAP ====== */
+function openSwap(i){
+  const day=PLAN.days[state.day]; const ex=day.blocks[i];
+  const pool=Array.from(new Set(PLAN.days.flatMap(d=>d.blocks.flatMap(b=>[b.name,...(b.swaps||[]),b.originalName])))).filter(Boolean).sort();
+  const modal=$("#swapModal"), list=$("#swapList"), search=$("#swapSearch");
+  $("#swapTitle").textContent=`Swap "${ex.name}"`;
+  $("#swapMeta").innerHTML=`<span class="badge">Pattern: ${ex.cat}</span>`+ex.equip.map(e=>`<span class="badge">${e}</span>`).join('');
+  modal.style.display='flex';
+
+  const eq=LS.get('equip',defaultEquip);
+  function isEquipOk(name){
+    const k=name.toLowerCase(); const rules=[
+      ["barbell","Barbell"],["bench","Barbell"],["deadlift","Barbell"],["front squat","Barbell"],
+      ["dumbbell","Dumbbells"],[" db","Dumbbells"],
+      ["kettlebell","Kettlebell"],[" kb","Kettlebell"],
+      ["cable","Cable/Machine"],["machine","Cable/Machine"],["lat pulldown","Cable/Machine"],
+      ["band","Bands"],["med ball","Med Ball"],[" mb","Med Ball"],["slam","Med Ball"],["throw","Med Ball"],
+      ["sled","Sled/Prowler"],["prowler","Sled/Prowler"],["rope","Battle Rope"],
+      ["row erg","Erg/Row/Ski"],["skierg","Erg/Row/Ski"],["erg","Erg/Row/Ski"],["landmine","Landmine"],
+      ["push-up","Bodyweight"],["plank","Bodyweight"],["burpee","Bodyweight"],["jump","Bodyweight"],["pull-up","Bodyweight"]];
+    for(const [kw,tag] of rules){ if(k.includes(kw)&&!eq[tag]) return false; } return true;
+  }
+  function inferCat(n){
+    const s=n.toLowerCase();
+    if(/(split|lunge)/.test(s))return"Lunge";
+    if(/deadlift|rdl|hinge|good morning|swing|hip thrust/.test(s))return"Hinge";
+    if(/squat/.test(s)&&!/jump/.test(s))return"Squat";
+    if(/row|pull-?up|chin-?up|face pull|lat pulldown/.test(s))return"Row/Pull";
+    if(/bench|push-?up|incline|press(?!.*overhead)/.test(s))return"Horizontal Push";
+    if(/overhead|push press|clean & press|landmine/.test(s))return"Vertical Push";
+    if(/carry/.test(s))return"Carry";
+    if(/plank|pallof|hollow|bird dog/.test(s))return"Core: Anti-Ext";
+    if(/leg raise/.test(s))return"Core: Lats/Hips";
+    if(/box jump|jump squat|broad jump/.test(s))return"Plyo";
+    if(/slam|throw/.test(s))return"Power Throw";
+    if(/sled|erg|skierg|battle rope|burpee|mountain climber|sprint/.test(s))return"Conditioning";
+    return"Conditioning";
+  }
+  function build(){
+    const arr=pool.map(n=>({name:n,cat:inferCat(n),score:0}));
+    arr.forEach(o=>{
+      o.score+=(o.cat===ex.cat?2:0);
+      o.score+=isEquipOk(o.name)?1:-2;
+      if(o.name.toLowerCase()===ex.name.toLowerCase()) o.score-=2;
+    });
+    arr.sort((a,b)=>b.score-a.score);
+    const sug=arr.filter(o=>o.score>=2).map(o=>o.name);
+    const rest=pool.filter(n=>!sug.includes(n));
+    return {sug,rest};
+  }
+  const {sug,rest}=build();
+  function draw(q=''){
+    list.innerHTML='';
+    const group=(t,items)=>{const g=document.createElement('div'); g.className='group'; g.innerHTML=`<h4>${t}</h4>`;
+      items.filter(n=>n.toLowerCase().includes(q.toLowerCase())).forEach(n=>{
+        const b=document.createElement('button'); b.textContent=n; b.onclick=()=>sel(n,b); g.appendChild(b);});
+      list.appendChild(g);};
+    group("Suggested (pattern + your equipment)",sug);
+    group("All options",rest);
+  }
+  let chosen=null; function sel(n,btn){ chosen=n; list.querySelectorAll('button').forEach(x=>x.style.background='transparent'); btn.style.background='rgba(255,255,255,.06)'; }
+  draw(); search.oninput=()=>draw(search.value);
+  $("#swapClose").onclick=()=>modal.style.display='none';
+  $("#swapRevert").onclick=()=>{ ex.name=ex.originalName; modal.style.display='none'; renderDay(); };
+  $("#swapApply").onclick=()=>{ if(chosen){ ex.name=chosen; modal.style.display='none'; renderDay(); } };
+}
+
+/* ====== TIMER ====== */
+const t={timer:null,remaining:0,total:0,paused:false,running:false};
+function startTimer(seconds,mode){ stopTimer(); t.running=true; t.paused=false; t.remaining=seconds; t.total=seconds;
+  setTxt('timerLabel', mode==='work'?'Work interval running…':`Rest ${seconds}s`); tick(); t.timer=setInterval(tick,1000); }
+function tick(){ if(t.paused) return;
+  if(t.remaining<=0){ stopTimer(); beep(660,0.08); setTimeout(()=>beep(880,0.12,90),100); flash('Rest done — start next set'); return; }
+  t.remaining--; const mm=String(Math.floor(t.remaining/60)).padStart(2,'0'), ss=String(t.remaining%60).padStart(2,'0');
+  setTxt('clock',`${mm}:${ss}`); const p=Math.max(0,Math.min(100,100*((t.total-t.remaining)/t.total)));
+  const bar=document.getElementById('bar'); if(bar) bar.style.width=p+'%'; if(t.remaining<=3) beep(520+t.remaining*30,0.06);
+}
+function stopTimer(){ if(t.timer) clearInterval(t.timer); t.timer=null; t.running=false; setTxt('clock','00:00');
+  const bar=document.getElementById('bar'); if(bar) bar.style.width='0%'; setTxt('timerLabel','Idle'); }
+function resetDay(){ const d=PLAN.days[state.day]; d.blocks.forEach((b,i)=>{ const inp=document.getElementById(`ex-${i}-count`);
+  if(inp){inp.value=0; setTxt(`ex-${i}-setsDone`,'0');} }); stopTimer(); flash('Reset'); }
+
+/* ====== SETTINGS ====== */
+function openSettings(){
+  const eq=LS.get('equip',defaultEquip); const grid=$("#equipGrid"); grid.innerHTML='';
+  for(const name of EQUIP_ALL){
+    const id='eq-'+name.replace(/[^a-z0-9]/ig,'_');
+    const lab=document.createElement('label');
+    lab.innerHTML=`<input type="checkbox" id="${id}" ${eq[name]?'checked':''}> <span>${name}</span>`;
+    grid.appendChild(lab);
+  }
+  $("#settingsModal").style.display='flex';
+}
+function saveSettings(){
+  const eq={}; for(const name of EQUIP_ALL){
+    const id='eq-'+name.replace(/[^a-z0-9]/ig,'_'); const el=document.getElementById(id); eq[name]=!!(el&&el.checked);
+  }
+  LS.set('equip',eq); $("#settingsModal").style.display='none'; toast('Saved equipment'); }
+
+/* ====== INIT ====== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Theme boot
+  const pref=LS.get('themeLight',null), sysLight=window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  const isLight=pref===null?sysLight:!!pref; applyTheme(isLight); $("#themeToggle").checked=isLight; updateThemeBadge();
+  on('#themeToggle','change',e=>{const light=e.target.checked; applyTheme(light); LS.set('themeLight',light); updateThemeBadge();});
+
+  // Keep all equipment ON by default (user can turn off)
+  LS.set('equip', LS.get('equip', defaultEquip));
+
+  // Populate days
+  const sel=$("#daySelect"); PLAN.days.forEach((d,i)=> sel.innerHTML+=`<option value="${i}">${d.id}</option>`); sel.value=state.day;
+  sel.onchange=e=>{state.day=+e.target.value; LS.set('currentDay',state.day); state.cursor=0; renderDay();};
+
+  // Buttons
+  on('#guidedBtn','click', ()=>{ state.guided=!state.guided; LS.set('guided',state.guided);
+    $('#guidedBtn').textContent=`🎧 Guided: ${state.guided?'On':'Off'}`; flash(`Guided ${state.guided?'On':'Off'}`); });
+  on('#settingsBtn','click', openSettings);
+  on('#settingsClose','click',()=>$("#settingsModal").style.display='none');
+  on('#settingsSave','click', saveSettings);
+
+  on('#startBtn','click',()=>{ flash('Workout started'); beep(700,0.1); });
+  on('#finishBtn','click',()=>{ flash('Workout finished'); beep(500,0.1); setTimeout(()=>beep(820,0.12,90),110); });
+  on('#resetBtn','click', resetDay);
+  on('#backExercise','click', prevExercise);
+  on('#nextExercise','click', nextExercise);
+
+  on('#workBtn','click', ()=> startTimer(+val('workSecs')||45,'work'));
+  on('#restBtn','click', ()=> startTimer(+val('restSecs')||60,'rest'));
+  on('#pauseBtn','click', ()=>{ t.paused=true; setTxt('timerLabel','Paused'); });
+  on('#resumeBtn','click', ()=>{ t.paused=false; setTxt('timerLabel','Resumed'); });
+  on('#stopBtn','click', stopTimer);
+  on('#soundToggle','click', ()=>{ sound=!sound; LS.set('soundOn',sound);
+    $('#soundToggle').textContent=`🔔 Sound: ${sound?'On':'Off'}`; });
+
+  renderDay();
+});
+</script>
 </body>
 </html>
