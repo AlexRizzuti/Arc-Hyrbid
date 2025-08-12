@@ -546,4 +546,52 @@ button{cursor:pointer}
   document.addEventListener('DOMContentLoaded', ()=>{
     const pref=LS.get('themeLight',null), sys=matchMedia('(prefers-color-scheme: light)').matches;
     const isLight=pref===null?sys:!!pref; applyTheme(isLight); $('#themeToggle').checked=isLight; updateThemeBadge();
-    $('#themeToggle').addEvent
+    $('#themeToggle').addEventListener('change',e=>{const l=e.target.checked; applyTheme(l); LS.set('themeLight',l); updateThemeBadge();});
+    LS.set('equip', LS.get('equip', defaultEquip));
+
+    // Nav wiring
+    $$('.tab').forEach(t=>t.addEventListener('click',()=>{ setTab(t.dataset.tab); if(t.dataset.tab==='program') renderProgram(); if(t.dataset.tab==='session') renderSession(); if(t.dataset.tab==='today') renderToday(); }));
+    $$('.nav button').forEach(b=>b.addEventListener('click',()=>{ setTab(b.dataset.tab); if(b.dataset.tab==='program') renderProgram(); if(b.dataset.tab==='session') renderSession(); if(b.dataset.tab==='today') renderToday(); }));
+
+    // Today quick links
+    $('#goSession').addEventListener('click',()=>{ setTab('session'); renderSession(); });
+    $('#goProgram').addEventListener('click',()=>{ setTab('program'); renderProgram(); });
+
+    // Timer controls
+    $('#workBtn').addEventListener('click',()=>startTimer(+val('workSecs')||45,'work'));
+    $('#restBtn').addEventListener('click',()=>startTimer(+val('restSecs')||60,'rest'));
+    $('#pauseBtn').addEventListener('click',()=>{t.paused=true; setTxt('timerLabel','Paused')});
+    $('#resumeBtn').addEventListener('click',()=>{t.paused=false; setTxt('timerLabel','Resumed')});
+    $('#stopBtn').addEventListener('click',stopTimer);
+    $('#soundToggle').addEventListener('click',()=>{ sound=!sound; LS.set('soundOn',sound); $('#soundToggle').textContent = "🔔 " + (sound?'On':'Off'); });
+
+    // Session nav
+    $('#nextEx').addEventListener('click', nextEx);
+    $('#prevEx').addEventListener('click', prevEx);
+    $('#finishSession').addEventListener('click', ()=>{ toast('Session complete'); setTab('today'); });
+
+    // Settings
+    const grid=$('#equipGrid'); grid.innerHTML='';
+    EQUIP_ALL.forEach(name=>{ const id='eq-'+name.replace(/[^a-z0-9]/ig,'_'); const row=document.createElement('label'); row.innerHTML=`<input type="checkbox" id="${id}" checked> <span>${name}</span>`; grid.appendChild(row); });
+    $('#saveEquip').addEventListener('click',()=>{ const eq={}; EQUIP_ALL.forEach(name=>{ const id='eq-'+name.replace(/[^a-z0-9]/ig,'_'); eq[name]=$('#'+id).checked; }); LS.set('equip',eq); toast('Equipment saved'); });
+
+    // Data
+    $('#exportBtn').addEventListener('click',exportData);
+    $('#importBtn').addEventListener('click',importData);
+    $('#resetBtn').addEventListener('click',()=>{ const m=LS.get(`pro_done_${state.day}`,{}); Object.keys(m).forEach(k=>m[k]=0); LS.set(`pro_done_${state.day}`,m); renderSession(); renderToday(); toast('Day reset'); });
+
+    // Guided toggle
+    $('#todayGuided'); // (display only)
+    $('#themeBadge'); // (display only)
+    const guidedBtn = document.createElement('button'); guidedBtn.className='ghost'; guidedBtn.textContent=`🎧 Guided: ${state.guided?'On':'Off'}`;
+    // Replace the tab "Session" button in top tabs? keep existing; use Today card state instead.
+    $('#app .tabs'); // keep
+
+    // Buttons near top (existing controls are in tabs)
+    // set Today view as default:
+    setTab('today'); renderToday(); renderProgram();
+  });
+})();
+</script>
+</body>
+</html>
