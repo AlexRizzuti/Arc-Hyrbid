@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Alex’s Functional Strength & Athletic Trainer</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+  }
+</script>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div class="brand">Alex’s Functional Trainer</div>
+  <div class="spinner"></div>
+</div>
+<div class="app" id="app" style="display:none;">
+  <div class="header">
+    <div class="brand">Alex’s Trainer</div>
+    <button class="btn clear" id="btnSettings">⚙️</button>
+  </div>
+
+  <div id="screenHome">
+    <div class="title">Choose your day</div>
+    <div id="weekTracker" class="card"></div>
+    <button class="btn" style="margin: 10px 16px;" id="btnGuided">Start Guided Mode</button>
+    <div id="daysList"></div>
+  </div>
+
+  <div id="screenWorkout" style="display:none;">
+    <div class="title" id="dayTitle"></div>
+    <div id="exerciseList"></div>
+    <div class="footer">
+      <button class="btn" id="btnFinishDay">Finish Workout</button>
+      <button class="btn secondary" id="btnBackHome">Back</button>
+    </div>
+  </div>
+
+  <div id="screenMobility" style="display:none;">
+    <div class="title">Stretching & Mobility</div>
+    <div id="mobilityList" class="card"></div>
+    <div class="footer">
+      <button class="btn" id="btnDoneMobility">Done</button>
+    </div>
+  </div>
+
+  <div id="screenGuided" style="display:none;">
+    <div class="card">
+      <div class="row-space">
+        <div><span class="badge" id="guidedDayName">Day</span></div>
+        <div class="small"><span id="guidedProgress">1/5</span></div>
+      </div>
+      <div class="row" id="guidedIllustration" style="justify-content:center; margin:6px 0;"></div>
+      <div class="title" id="guidedExerciseName" style="margin:8px 0 0 0;"></div>
+      <div class="row-space small">
+        <div id="guidedMeta"></div>
+        <div><button class="btn clear" id="btnSwap">Swap</button></div>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+      <div class="row-space" style="padding:8px 0;">
+        <button class="btn secondary" id="btnStartRest">Start Rest</button>
+        <button class="btn" id="btnNext">Next Exercise</button>
+      </div>
+      <div class="row-space" style="padding-top:6px;">
+        <button class="btn clear" id="btnSkip">Skip</button>
+        <button class="btn clear" id="btnMarkDone">Mark Done</button>
+      </div>
+    </div>
+    <div class="footer">
+      <button class="btn secondary" id="btnExitGuided">Exit Guided Mode</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modalSheet">
+    <div class="sheet">
+      <div class="row-space">
+        <div class="title" id="modalTitle" style="margin:0;">Exercise</div>
+        <button class="btn clear" id="closeModal">Close</button>
+      </div>
+      <div id="modalIllustration" class="row" style="justify-content:center; margin:8px 0;"></div>
+      <div id="modalDetails" class="small"></div>
+      <div class="hr"></div>
+      <div><strong>Substitutions</strong></div>
+      <div id="subsList" class="list"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="modalSettings">
+    <div class="sheet">
+      <div class="row-space">
+        <div class="title" style="margin:0;">Settings</div>
+        <button class="btn clear" id="closeSettings">Close</button>
+      </div>
+      <div class="card">
+        <div class="row-space">
+          <div>Sound cues</div>
+          <label class="row" style="gap:6px;">
+            <input type="checkbox" id="toggleSound"/>
+            <span class="small">Beep after rest & at round start</span>
+          </label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row-space">
+          <div>Reset weekly tracker</div>
+          <button class="btn secondary" id="btnResetWeek">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
